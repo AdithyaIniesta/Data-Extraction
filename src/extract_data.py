@@ -70,7 +70,6 @@ def extract_data(topics, filename, jsonfile, base_data_folder, args):
         img_folder = os.path.join(data_folder, imgf)
         full_image_folders.append(img_folder)
         if not os.path.exists(img_folder):
-            print(img_folder)
             os.mkdir(img_folder)
 
     depthimgfolder = os.path.join(data_folder, "depth")
@@ -356,7 +355,6 @@ def resample(data_folder, args):
     camera_matrix_ids = None
     for tt, tt2 in zip(original_files, resampled_files):
         if not os.path.exists(os.path.join(data_folder, tt)):
-            print(os.path.join(data_folder, tt))
             continue
         try:
             wrench = np.load(os.path.join(data_folder, tt))
