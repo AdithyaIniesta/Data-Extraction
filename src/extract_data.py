@@ -52,6 +52,19 @@ def get_transform_matrix(transform):
     return mat
 
 
+def remove_joint(msg, joint_name):
+    assert joint_name in msg.name
+    idx_base_f_bumper_joint = msg.name.index(joint_name)
+    del (
+        msg.name[idx_base_f_bumper_joint],
+        msg.position[idx_base_f_bumper_joint],
+        msg.velocity[idx_base_f_bumper_joint],
+        msg.effort[idx_base_f_bumper_joint],
+    )
+    assert joint_name not in msg.name
+    return msg
+
+
 def extract_data(topics, filename, jsonfile, base_data_folder, args):
     basefile = os.path.splitext(os.path.basename(filename))[0]
     basefolder = os.path.split(os.path.dirname(os.path.abspath(filename)))[-1]
@@ -60,7 +73,6 @@ def extract_data(topics, filename, jsonfile, base_data_folder, args):
     if not os.path.exists(data_folder):
         os.mkdir(data_folder)
 
-    print(data_folder)
     image_folders = ["rgb"]
     shutil.copy(jsonfile, data_folder)
 
@@ -150,6 +162,16 @@ def extract_data(topics, filename, jsonfile, base_data_folder, args):
             positions = [t.to_sec()]
             velocities = [t.to_sec()]
             effort = [t.to_sec()]
+
+            # Convert tuple to list
+            msg.position = list(msg.position)
+            msg.velocity = list(msg.velocity)
+            msg.effort = list(msg.effort)
+
+            # Specify the joints to remove
+            msg = remove_joint(msg, "base_f_bumper_joint")
+            msg = remove_joint(msg, "base_b_bumper_joint")
+
             positions.extend(msg.position)
             velocities.extend(msg.velocity)
             effort.extend(msg.effort)
@@ -178,7 +200,7 @@ def extract_data(topics, filename, jsonfile, base_data_folder, args):
                 )
             if joint_names is None:
                 joint_names = msg.name
-                print(joint_names)
+                # print(joint_names, len(joint_names))
 
             cam_matrix = mat1.dot(mat2).dot(mat3).dot(mat4)
             cam_translation = translation_from_matrix(cam_matrix)
