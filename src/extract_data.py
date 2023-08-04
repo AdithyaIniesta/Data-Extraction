@@ -401,7 +401,12 @@ def resample(data_folder, args):
 
         if "joint_state_positions_full" in tt:
             camera_matrix_ids = ids
+
         wrench_rs = wrench[ids]
+
+        if "matrix" not in tt:
+            wrench_rs = np.delete(wrench_rs, 0, 1)
+
         np.save(wrench_resampled, wrench_rs, allow_pickle=False)
 
 
@@ -452,11 +457,26 @@ def main():
 
     print(json_files)
     print("Found %d bagfiles and %d json files" % (len(files), len(json_files)))
+
     for bagfile, jsonfile in zip(files, json_files):
         basefile = os.path.splitext(os.path.basename(bagfile))[0]
         basefolder = os.path.split(os.path.dirname(os.path.abspath(bagfile)))[-1]
         data_folder = extract_data(topics, bagfile, jsonfile, base_data_folder, args)
         resample(data_folder, args)
+
+    """
+    # Delete first column from numpy array
+    joint_state_positions = np.load(
+        os.path.join(
+            base_data_folder, "pour_2023_08_01_13-46-57_0/joint_state_positions.npy"
+        )
+    )
+    
+    joint_state_positions = np.delete(joint_state_positions, 0, 1)
+    print(joint_state_positions.shape)
+    print(joint_state_positions[0:4, 0:4])
+    print(joint_state_positions_del[0:3, 0:3])
+    """
 
 
 if __name__ == "__main__":
